@@ -1,14 +1,13 @@
 import numpy as np
 
 
-def CR_Func(pop, theta0, Obstacle_Area, Covered_Area):
+def CR_Func(pop, stat, Obstacle_Area, Covered_Area):
 
     """
     Calculate the Coverage Ratio as a cost function.
     Parameters:
         pop (x, y, phi) * N is the optimization variable
-        rs is the sensing radius vector
-        theta0 is the working direction vector
+        stat (rs0, theta0, rc)
         Obstacle_Area: 1 means area need to cover; 0 means area dont need to cover
         Covered_Area: 1 means area covered; 0 means area not covered
     Returns:
@@ -23,9 +22,9 @@ def CR_Func(pop, theta0, Obstacle_Area, Covered_Area):
         # node position j-th
         x0 = pop[j, 0]
         y0 = pop[j, 1]
-        alpha = pop[j, 2]
-        rsJ = pop[j, 3]
-        thetaJ = theta0[j]
+        phij = pop[j, 2]
+        rsJ = stat[0,j]
+        thetaJ = stat[1,j]
 
         # boundary constraint
         x_ub = min(int(np.ceil(x0 + rsJ)), Covered_Area.shape[0])
@@ -50,12 +49,12 @@ def CR_Func(pop, theta0, Obstacle_Area, Covered_Area):
         in_circle = D <= rsJ
 
         # theta in theta0 condition
-        if alpha - thetaJ / 2 < 0:
-            in_angle = (Theta >= alpha - thetaJ / 2 + 2 * np.pi) | (Theta <= alpha + thetaJ / 2)
-        elif alpha + thetaJ / 2 > 2 * np.pi:
-            in_angle = (Theta >= alpha - thetaJ / 2) | (Theta <= alpha + thetaJ / 2 - 2 * np.pi)
+        if phij - thetaJ / 2 < 0:
+            in_angle = (Theta >= phij - thetaJ / 2 + 2 * np.pi) | (Theta <= phij + thetaJ / 2)
+        elif phij + thetaJ / 2 > 2 * np.pi:
+            in_angle = (Theta >= phij - thetaJ / 2) | (Theta <= phij + thetaJ / 2 - 2 * np.pi)
         else:
-            in_angle = (Theta >= alpha - thetaJ / 2) & (Theta <= alpha + thetaJ / 2)
+            in_angle = (Theta >= phij - thetaJ / 2) & (Theta <= phij + thetaJ / 2)
 
         # both conditions
         inside_sector[y_lb:y_ub + 1, x_lb:x_ub + 1] |= (in_circle & in_angle)
